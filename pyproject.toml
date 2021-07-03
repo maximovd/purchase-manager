@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "purchase-manager"
+version = "0.1.0"
+description = "Implementation of the purchase manager on FastAPI"
+authors = ["Danil Maximov <bazinga.mail@yandex.ru>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.65.2"
+loguru = "^0.5.3"
+tortoise-orm = {version = "^0.17.4", extras = ["aiomysql"]}
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+black = "^21.6b0"
+isort = "^5.9.1"
+autoflake = "^1.4"
+pytest-cov = "^2.12.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
