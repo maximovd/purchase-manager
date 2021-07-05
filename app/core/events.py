@@ -7,7 +7,7 @@ def create_start_app_handler(app: FastAPI) -> Callable:  # type: ignore
     register_tortoise(
         app,
         db_url=DATABASE_URL,
-        modules={"models": ["models"]},
+        modules={"models": ["categories", "products", "users"]},
         generate_schemas=True,
         add_exception_handlers=True,
     )
