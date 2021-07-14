@@ -12,8 +12,9 @@ class Categories(models.Model):
         return self.name
 
 
-Category_Pydantic = pydantic_model_creator(Categories, name="Category")
-CategoryIn_Pydantic = pydantic_model_creator(Categories, name="CategoryIn", exclude_readonly=True)
+CategoryOutGet = pydantic_model_creator(Categories, name="CategoryOutGet")
+CategoryOutPost = pydantic_model_creator(Categories, name="CategoryOutPost", include=("id",))
+CategoryIn = pydantic_model_creator(Categories, name="CategoryIn", exclude_readonly=True)
 
 
 class StatusTypes(str, enum.Enum):
@@ -32,8 +33,9 @@ class Products(models.Model):
         return f"Product:{self.id} [{self.title}]"
 
 
-Product_Pydantic = pydantic_model_creator(Products, name="Product")
-ProductIn_Pydantic = pydantic_model_creator(Products, name="ProductIn", exclude_readonly=True)
+ProductOutGet = pydantic_model_creator(Products, name="ProductOutGet")
+ProductOutPost = pydantic_model_creator(Products, name="ProductOutPost", include=("id",))
+ProductIn = pydantic_model_creator(Products, name="ProductIn", exclude_readonly=True)
 
 
 class Users(models.Model):
@@ -48,5 +50,8 @@ class Users(models.Model):
         return self.username
 
 
-User_Pydantic = pydantic_model_creator(Users, name="User")
-UserIn_Pydantic = pydantic_model_creator(Users, name="UserIn", exclude_readonly=True)
+UserOutGet = pydantic_model_creator(Users, name="UserOutGet")
+UserOutPost = pydantic_model_creator(Users, name="UserOutPost", include=("id",))
+UserIn = pydantic_model_creator(Users, name="UserIn", exclude_readonly=True)
+
+# TODO Figure out how to distribute models to files
