@@ -10,6 +10,7 @@ python = "^3.9"
 fastapi = "^0.65.2"
 loguru = "^0.5.3"
 tortoise-orm = {version = "^0.17.4", extras = ["aiomysql"]}
+aerich = "^0.5.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
