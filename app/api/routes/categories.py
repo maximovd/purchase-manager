@@ -32,8 +32,8 @@ async def get_category(category_id: int) -> CategoryOutGet:
 async def create_category(category: CategoryIn) -> CategoryOutPost:
     """
     Create new category.
-    :param category: category data.
-    :return: new category object.
+    :param category: category data
+    :return: new category object
     """
     category_obj = await Categories.create(**category.dict(exclude_unset=True))
     return await CategoryOutPost.from_tortoise_orm(category_obj)
