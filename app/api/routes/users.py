@@ -3,7 +3,8 @@ from typing import List
 from fastapi import APIRouter
 from tortoise.contrib.fastapi import HTTPNotFoundError
 
-from app.models import UserOutGet, Users, UserOutPost, ProductOutPost, ProductOutGet, ProductIn, Products
+from app.models import UserOutGet, Users, UserOutPost, ProductOutPost, ProductOutGet, ProductIn, Products, CategoryIn, \
+    Categories, CategoryOutGet
 
 router = APIRouter()
 
@@ -79,3 +80,21 @@ async def get_user_product_by_product_id(user_id: int, product_id: int) -> Produ
     :return: product object
     """
     return await ProductOutGet.from_queryset_single(Products.get(owner_id=user_id, id=product_id))
+
+
+@router.post("/{user_id}/product/", response_model=ProductOutPost)
+async def create_product_for_user(user_id: int, product: ProductIn, categories: List[CategoryIn]) -> ProductOutPost:
+    """
+    Create product for user
+    :param categories: Categories data
+    :param user_id: User ID
+    :param product: Product data
+    :return: new Product
+    """
+    product_obj = await Products.create(**product.dict(exclude_unset=True))
+    product_obj.owner_id = user_id
+    for category in categories:
+        category_obj = await CategoryOutGet.from_queryset_single(Categories.get(id=category.id))
+        await product_obj.categories.add(*category_obj)
+    await product_obj.save()
+    return ProductOutPost.from_tortoise_orm(product_obj)

@@ -53,5 +53,5 @@ async def update_category(category_id: int, category: CategoryIn) -> CategoryOut
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_category(category_id: int) -> dict:
-    delete_count = await Categories.filter(id=category_id).delete()
-    pass
+    await Categories.filter(id=category_id).delete()
+    return {"status": "ok"}
