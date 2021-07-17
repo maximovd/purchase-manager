@@ -98,3 +98,34 @@ async def create_product_for_user(user_id: int, product: ProductIn, categories: 
         await product_obj.categories.add(*category_obj)
     await product_obj.save()
     return ProductOutPost.from_tortoise_orm(product_obj)
+
+
+@router.put(
+    "/{user_id}/product/{product_id}",
+    response_model=ProductOutGet,
+    responses={404: {"model": HTTPNotFoundError}}
+)
+async def update_product_by_user(user_id: int, product_id: int, product: ProductIn) -> ProductOutGet:
+    """
+    Full update product for user.
+    :param user_id: User ID
+    :param product_id: Product id
+    :param product: update Product
+    :return:
+    """
+    await Products.filter(id=product_id, owner_id=user_id).update(**product.dict(exclude_unset=True))
+    return await ProductOutGet.from_queryset_single(Products.get(id=product_id, owner_id=user_id))
+
+
+@router.patch("/{user_id}/product/{product_id}")
+async def patch_product_for_user(user_id: int, product_id: int, product: ProductIn) -> ProductOutGet:
+    """
+    Patch product object.
+    :param user_id: User ID
+    :param product_id: Product ID
+    :param product: Product data
+    :return: patched product
+    """
+    old_product = await Products.get(id=product_id, owner_id=user_id)
+    await old_product.update_from_dict(product.dict(exclude_unset=True))
+    return old_product
