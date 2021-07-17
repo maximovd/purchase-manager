@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    restart: on-failure
+    ports:
+    - "8000:8000"
+    environment:
+      DB_CONNECTION: "mysql://root:password@localhost:3306/purchase_manager"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+    - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: purchase_manager
+    volumes:
+    - my-db:/var/lib/mysql
+volumes:
+  my-db:
