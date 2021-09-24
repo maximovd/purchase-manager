@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends netcat && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get install gcc -y
 
 COPY poetry.lock pyproject.toml ./
 RUN pip install poetry==1.1 && \

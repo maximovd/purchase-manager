@@ -8,8 +8,7 @@ from app.api.errors.http_error import http_error_handler
 from app.api.errors.validaition_error import http422_error_handler
 from app.api.routes.api import router as api_router
 from app.core.config import PROJECT_NAME, DEBUG, VERSION, ALLOWED_HOSTS, API_PREFIX
-from app.core.events import create_start_app_handler, init_celery_app
-from app.services.tasks import clean_done_purchase_task
+from app.core.events import create_start_app_handler
 
 
 def get_application() -> FastAPI:
@@ -30,9 +29,6 @@ def get_application() -> FastAPI:
     application.add_exception_handler(RequestValidationError, http422_error_handler)
 
     application.include_router(api_router, prefix=API_PREFIX)
-
-    celery = init_celery_app()
-    celery.add_periodic_task(crontab(hour=24, minute=00), clean_done_purchase_task())
 
     return application
 
