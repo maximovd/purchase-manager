@@ -15,15 +15,16 @@ services:
 
   db:
     image: mysql
-    command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
     - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: 1qaz2wsx
-      MYSQL_DATABASE: purchase_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=1qaz2wsx
+      - MYSQL_DATABASE=purchase_db
+      - MYSQL_ROOT_PASSWORD=password
     volumes:
-    - my-db:/var/lib/mysql
+    - db_data:/var/lib/mysql
 
   rabbitmq:
     image: bitnami/rabbitmq:3.7
@@ -46,7 +47,9 @@ services:
 
   worker:
     build: .
-    command: "poetry run celery -A app.services.tasks worker --loglevel=info"
+    command: "poetry run celery -A app.services.tasks worker -B -l info -Q clean_task-queue -c 1"
+    env_file:
+      - .env
     volumes:
       - .:/app
     depends_on:
@@ -70,10 +73,11 @@ services:
       - "5555:5555"
     depends_on:
       - rabbitmq
+      - redis
 
 volumes:
   rabbitmq_data:
     driver: local
   redis_data:
     driver: local
-  my-db:
+  db_data:

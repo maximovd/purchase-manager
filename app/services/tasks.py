@@ -1,10 +1,8 @@
 from celery.schedules import crontab
 from loguru import logger
 
-from app.core.events import init_celery_app, async_to_sync
+from app.core.events import async_to_sync, celery_app
 from app.models import Products, StatusTypes
-
-celery_app = init_celery_app()
 
 
 @celery_app.on_after_configure.connect
@@ -18,7 +16,7 @@ def sync_clean_done_task() -> None:
     async_to_sync(clean_done_purchase_task)
 
 
-async def clean_done_purchase_task():
+async def clean_done_purchase_task() -> None:
     """Task for clean purchase with status DONE."""
     async for product in Products.all():
         if product.status == StatusTypes.DONE:
