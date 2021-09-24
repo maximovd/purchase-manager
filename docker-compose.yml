@@ -6,23 +6,78 @@ services:
     restart: on-failure
     ports:
     - "8000:8000"
-    environment:
-      DB_CONNECTION: "mysql://root:password@localhost:3306/purchase_manager"
     env_file:
       - .env
     depends_on:
       - db
+      - rabbitmq
+      - redis
 
   db:
     image: mysql
-    command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
     - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: purchase_manager
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=1qaz2wsx
+      - MYSQL_DATABASE=purchase_db
+      - MYSQL_ROOT_PASSWORD=password
     volumes:
-    - my-db:/var/lib/mysql
+    - db_data:/var/lib/mysql
+
+  rabbitmq:
+    image: bitnami/rabbitmq:3.7
+    ports:
+      - "4369:4369"
+      - "5672:5672"
+      - "25672:25672"
+      - "15672:15672"
+    volumes:
+      - "rabbitmq_data:/bitnami"
+
+  redis:
+    image: bitnami/redis:5.0.4
+    environment:
+      - REDIS_PASSWORD=password
+    ports:
+      - "6367:6379"
+    volumes:
+      - "redis_data:/bitnami/redis/data"
+
+  worker:
+    build: .
+    command: "poetry run celery -A app.services.tasks worker -B -l info -Q clean_task-queue -c 1"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - app
+      - rabbitmq
+      - redis
+
+  dashboard:
+    image: gregsi/latest-celery-flower-docker:latest
+    environment:
+      - AMQP_USERNAME=user
+      - AMQP_PASSWORD=bitnami
+      - AMQP_ADMIN_USERNAME=user
+      - AMQP_ADMIN_PASSWORD=bitnami
+      - AMQP_HOST=rabbitmq
+      - AMQP_PORT=5672
+      - AMQP_ADMIN_HOST=rabbitmq
+      - AMQP_ADMIN_PORT=15672
+      - FLOWER_BASIC_AUTH=user:test
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
+      - redis
+
 volumes:
-  my-db:
+  rabbitmq_data:
+    driver: local
+  redis_data:
+    driver: local
+  db_data:

@@ -45,6 +45,11 @@ ALLOWED_HOSTS: List[str] = config(
     default="",
 )
 
+# Celery conf
+
+BROKER_URI: str = config("BROKER_URI", cast=str)
+REDIS_SERVER: str = config("REDIS_SERVER", cast=str)
+
 # Logging Conf
 
 LOGGING_LEVEL = logging.DEBUG if DEBUG else logging.INFO
