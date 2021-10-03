@@ -39,7 +39,14 @@ def async_to_sync(func: Callable, *args, **kwargs) -> None:
     asyncio.run(wrap_db_ctx(func, *args, **kwargs))
 
 
-celery_app.conf.task_routes = {
-    "app.service.task.sync_clean_done_task": "clean_task-queue"
+# celery_app.conf.task_routes = {
+#     "app.service.task.sync_clean_done_task": "clean_task-queue"
+# }
+# celery_app.conf.update(task_track_started=True)
+
+celery_app.conf.beat_schedule = {
+    "clean_task": {
+        "task": "app.service.task.sync_clean_done_task",
+        "schedule": 10.0
+    }
 }
-celery_app.conf.update(task_track_started=True)
