@@ -1,12 +1,15 @@
+import asyncio
 import time
 from contextlib import asynccontextmanager
+from typing import Callable
 
 from fastapi import Depends
 from fastapi_cache import caches
 from fastapi_cache.backends.redis import CACHE_KEY, RedisCacheBackend
 from loguru import logger
+from tortoise import Tortoise
 
-from app.core.config import LOCK_EXPIRE
+from app.core.config import LOCK_EXPIRE, DATABASE_URL
 
 
 def redis_cache():
@@ -33,3 +36,16 @@ async def one_task(fn, self):
         if acquired:
             return fn()
         logger.debug(f'{self.name} - already running')
+
+
+def async_to_sync(func: Callable, *args, **kwargs) -> None:
+    """Convert asynchronous func to synchronous."""
+    asyncio.run(wrap_db_ctx(func, *args, **kwargs))
+
+
+# TODO Rework this to decorator
+async def wrap_db_ctx(func: Callable, *args, **kwargs) -> None:
+    """Init db and run task."""
+    await Tortoise.init(db_url=DATABASE_URL, modules={"models": ["models"]})
+    await Tortoise.generate_schemas()
+    await func(*args, **kwargs)

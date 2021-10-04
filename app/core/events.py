@@ -1,9 +1,7 @@
-import asyncio
 from typing import Callable
 
 from celery import Celery
 from fastapi import FastAPI
-from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
 from app.core.config import DATABASE_URL, BROKER_URI, REDIS_SERVER
@@ -24,19 +22,6 @@ def init_celery_app() -> Celery:
 
 
 celery_app = init_celery_app()
-
-
-# TODO Rework this to decorator
-async def wrap_db_ctx(func: Callable, *args, **kwargs) -> None:
-    """Init db and run task."""
-    await Tortoise.init(db_url=DATABASE_URL, modules={"models": ["models"]})
-    await Tortoise.generate_schemas()
-    await func(*args, **kwargs)
-
-
-def async_to_sync(func: Callable, *args, **kwargs) -> None:
-    """Convert asynchronous func to synchronous."""
-    asyncio.run(wrap_db_ctx(func, *args, **kwargs))
 
 
 # celery_app.conf.task_routes = {

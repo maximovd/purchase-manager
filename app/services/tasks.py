@@ -3,9 +3,9 @@ import time
 from celery.schedules import crontab
 from loguru import logger
 
-from app.core.events import async_to_sync, celery_app
+from app.core.events import celery_app
 from app.models import Products, StatusTypes
-from app.services.utils import one_task
+from app.services.utils import one_task, async_to_sync
 
 
 @celery_app.on_after_configure.connect
