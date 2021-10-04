@@ -18,7 +18,8 @@ async def task_lock(lock_id, oid):
     cache: RedisCacheBackend = Depends(redis_cache)
     timeout_at = time.monotonic() + LOCK_EXPIRE - 3
     # cache.add fails if the key already exists
-    status = await cache.add(lock_id, oid, LOCK_EXPIRE)
+    status = await cache.add(lock_id, oid)
+    await cache.expire(lock_id, LOCK_EXPIRE)
     try:
         yield status
     finally:

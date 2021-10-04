@@ -16,7 +16,11 @@ def setup_periodic_tasks(sender, **kwargs) -> None:
 @celery_app.task(bind=True)
 def sync_clean_done_task(self) -> None:
     """Convert async func to sync."""
-    one_task(async_to_sync(clean_done_purchase_task), self)
+    async_to_sync(run_lock_task, self)
+
+
+async def run_lock_task(self):
+    await one_task(clean_done_purchase_task, self)
 
 
 async def clean_done_purchase_task() -> None:
@@ -25,4 +29,3 @@ async def clean_done_purchase_task() -> None:
         if product.status == StatusTypes.DONE:
             await product.delete()
             logger.info(f'Purchase <{product.id}> was deleted because it was in the {product.status} state')
-        time.sleep(50)
