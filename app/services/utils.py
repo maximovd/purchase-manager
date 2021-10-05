@@ -3,22 +3,16 @@ import time
 from contextlib import asynccontextmanager
 from typing import Callable
 
-from fastapi import Depends
-from fastapi_cache import caches
-from fastapi_cache.backends.redis import CACHE_KEY, RedisCacheBackend
+from fastapi_cache.backends.redis import RedisCacheBackend
 from loguru import logger
 from tortoise import Tortoise
 
-from app.core.config import LOCK_EXPIRE, DATABASE_URL
-
-
-def redis_cache():
-    return caches.get(CACHE_KEY)
+from app.core.config import LOCK_EXPIRE, DATABASE_URL, REDIS_SERVER
 
 
 @asynccontextmanager
 async def task_lock(lock_id, oid):
-    cache: RedisCacheBackend = Depends(redis_cache)
+    cache = RedisCacheBackend(REDIS_SERVER)
     timeout_at = time.monotonic() + LOCK_EXPIRE - 3
     # cache.add fails if the key already exists
     status = await cache.add(lock_id, oid)
@@ -35,17 +29,18 @@ async def one_task(fn, self):
     async with task_lock(lock_id, self.app.oid) as acquired:
         if acquired:
             return fn()
-        logger.debug(f'{self.name} - already running')
+        logger.info(f'{self.name} - already running')
 
 
 def async_to_sync(func: Callable, *args, **kwargs) -> None:
     """Convert asynchronous func to synchronous."""
-    asyncio.run(wrap_db_ctx(func, *args, **kwargs))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(wrap_db_ctx(func, *args, **kwargs))
 
 
 # TODO Rework this to decorator
 async def wrap_db_ctx(func: Callable, *args, **kwargs) -> None:
     """Init db and run task."""
-    await Tortoise.init(db_url=DATABASE_URL, modules={"models": ["models"]})
+    await Tortoise.init(db_url=DATABASE_URL, modules={"models": ["app.models"]})
     await Tortoise.generate_schemas()
     await func(*args, **kwargs)
