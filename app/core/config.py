@@ -24,6 +24,16 @@ DATABASE_URL: str = config("DB_CONNECTION", cast=str)
 MAX_CONNECTION_COUNT: int = config("MAX_CONNECTION_COUNT", cast=int, default=10)
 MIN_CONNECTION_COUNT: int = config("MIN_CONNECTION_COUNT", cast=int, default=10)
 
+TORTOISE_ORM = {
+    "connections": {"default": DATABASE_URL},
+    "apps": {
+        "models": {
+            "models": ["app.models", "aerich.models"],
+            "default_connection": "default",
+        },
+    },
+}
+
 # Security config
 
 SECRET_KEY: Secret = config("SECRET_KEY", cast=Secret)
@@ -34,6 +44,12 @@ ALLOWED_HOSTS: List[str] = config(
     cast=CommaSeparatedStrings,
     default="",
 )
+
+# Celery conf
+
+BROKER_URI: str = config("BROKER_URI", cast=str)
+REDIS_SERVER: str = config("REDIS_SERVER", cast=str)
+LOCK_EXPIRE: int = 60 * 10  # Lock expires in 10 minutes
 
 # Logging Conf
 
