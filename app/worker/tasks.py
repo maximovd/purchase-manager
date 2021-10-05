@@ -1,31 +1,13 @@
-import asyncio
-from time import sleep
-
-from celery import current_task
 from loguru import logger
 
 from app.models import Products, StatusTypes
-from app.services.utils import async_to_sync, one_task, task_lock
+from app.services.utils import async_to_sync, task_lock
 from app.worker.worker import celery_app
-
-
-# @celery_app.on_after_configure.connect
-# def setup_repeated_tasks(sender, **kwargs):
-#     sender.add_periodic_task(30.0, test_celery.s())
 
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs) -> None:
     sender.add_periodic_task(20.0, sync_clean_done_task.s())
-
-
-@celery_app.task
-def test_celery() -> str:
-    for i in range(1, 11):
-        sleep(1)
-        current_task.update_state(state='PROGRESS',
-                                  meta={'process_percent': i * 10})
-    return "test task return"
 
 
 @celery_app.task(bind=True)
