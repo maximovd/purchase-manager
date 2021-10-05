@@ -45,33 +45,28 @@ services:
     volumes:
       - "redis_data:/bitnami/redis/data"
 
+  celery-flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=amqp://user:bitnami@rabbitmq:5672//
+      - FLOWER_PORT=8888
+    ports:
+      - "8888:8888"
+    depends_on:
+      - rabbitmq
+      - redis
+
   worker:
     build: .
-    command: "poetry run celery -A app.services.tasks worker -B -l info -Q clean_task-queue -c 1"
+    command: "poetry run celery -A app.worker.tasks worker -B -l info"
     env_file:
       - .env
+    environment:
+       C_FORCE_ROOT: "true"
     volumes:
       - .:/app
     depends_on:
       - app
-      - rabbitmq
-      - redis
-
-  dashboard:
-    image: gregsi/latest-celery-flower-docker:latest
-    environment:
-      - AMQP_USERNAME=user
-      - AMQP_PASSWORD=bitnami
-      - AMQP_ADMIN_USERNAME=user
-      - AMQP_ADMIN_PASSWORD=bitnami
-      - AMQP_HOST=rabbitmq
-      - AMQP_PORT=5672
-      - AMQP_ADMIN_HOST=rabbitmq
-      - AMQP_ADMIN_PORT=15672
-      - FLOWER_BASIC_AUTH=user:test
-    ports:
-      - "5555:5555"
-    depends_on:
       - rabbitmq
       - redis
 

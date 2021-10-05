@@ -1,13 +1,15 @@
-from celery.schedules import crontab
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from fastapi_cache.backends.memory import CACHE_KEY
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
+from fastapi_cache import caches, close_caches
+from fastapi_cache.backends.redis import RedisCacheBackend
 
 from app.api.errors.http_error import http_error_handler
 from app.api.errors.validaition_error import http422_error_handler
 from app.api.routes.api import router as api_router
-from app.core.config import PROJECT_NAME, DEBUG, VERSION, ALLOWED_HOSTS, API_PREFIX
+from app.core.config import PROJECT_NAME, DEBUG, VERSION, ALLOWED_HOSTS, API_PREFIX, REDIS_SERVER
 from app.core.events import create_start_app_handler
 
 
@@ -34,3 +36,14 @@ def get_application() -> FastAPI:
 
 
 app = get_application()
+
+
+@app.on_event('startup')
+async def on_startup() -> None:
+    rc = RedisCacheBackend(REDIS_SERVER)
+    caches.set(CACHE_KEY, rc)
+
+
+@app.on_event('shutdown')
+async def on_shutdown() -> None:
+    await close_caches()
