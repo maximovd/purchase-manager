@@ -17,21 +17,21 @@ def create_start_app_handler(app: FastAPI) -> Callable:  # type: ignore
     )
 
 
-def init_celery_app() -> Celery:
-    return Celery("worker", backend=REDIS_SERVER, broker=BROKER_URI)
-
-
-celery_app = init_celery_app()
-
+# def init_celery_app() -> Celery:
+#     return Celery("worker", backend=REDIS_SERVER, broker=BROKER_URI)
+#
+#
+# celery_app = init_celery_app()
+#
 
 # celery_app.conf.task_routes = {
 #     "app.service.task.sync_clean_done_task": "clean_task-queue"
 # }
 # celery_app.conf.update(task_track_started=True)
-
-celery_app.conf.beat_schedule = {
-    "clean_task": {
-        "task": "app.service.task.sync_clean_done_task",
-        "schedule": 10.0
-    }
-}
+#
+# celery_app.conf.beat_schedule = {
+#     "clean_task": {
+#         "task": "app.service.task.sync_clean_done_task",
+#         "schedule": 10.0
+#     }
+# }
