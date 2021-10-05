@@ -1,8 +1,29 @@
-# purchase-manager
-Implementation of the purchase manager on FastAPI
+## Технологии
 
-To run the web application in debug use:
+fastapi, poetry, tortoise-orm, aerich, mysql, celery, flower, rabbitmq, redis
+
+## Краткое описание
+
+Бекенд менеджера для ведения списка покупок.
+
+В Celery стартует задача, для очистки купленных продуктов
+
+## Информация о деплое
+Деплой через docker-compose с FastAPI, MySQL, redis, rabbitmq, celery, flower
+
+## Запуск
+Перед запуском следует скопировать параметры виртуального окружение из `.env.example`
+в `.env`
+
+Запуск производится командой:
 ```shell
-aerich upgrade
-uvicorn app.main:app --reload
+docker-compose up -d --build
 ```
+
+## Использование
+
+По умолчанию приложение запускается по адресу: http://127.0.0.1:8000
+
+Для доступа к документации: http://127.0.0.1:8000/swagger
+
+Для доступа к интерфейсу flower: http://127.0.0.1:8888
