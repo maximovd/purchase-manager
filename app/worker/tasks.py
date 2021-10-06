@@ -1,3 +1,5 @@
+import time
+
 from loguru import logger
 
 from app.models import Products, StatusTypes
@@ -30,3 +32,4 @@ async def clean_done_purchase() -> None:
         if product.status == StatusTypes.DONE:
             await product.delete()
             logger.info(f'Purchase <{product.id}> was deleted because it was in the {product.status} state')
+        time.sleep(50)

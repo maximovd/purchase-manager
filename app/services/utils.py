@@ -15,12 +15,20 @@ async def task_lock(lock_id, oid):
     cache = RedisCacheBackend(REDIS_SERVER)
     timeout_at = time.monotonic() + LOCK_EXPIRE - 3
     # cache.add fails if the key already exists
-    status = await cache.add(lock_id, oid)
-    await cache.expire(lock_id, LOCK_EXPIRE)
+    status = True
+    task = await cache.get(lock_id, oid)
+    if task:
+        logger.info(f"Found running task: {lock_id}")
+        status = False
+    else:
+        logger.info(f"New task: {lock_id} -> running")
+        await cache.set(lock_id, oid)
+        await cache.expire(lock_id, LOCK_EXPIRE)
     try:
         yield status
     finally:
         if time.monotonic() < timeout_at and status:
+            logger.info(f"Task cache: {lock_id} was delete")
             await cache.delete(lock_id)
 
 

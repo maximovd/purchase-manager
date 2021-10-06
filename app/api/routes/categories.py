@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter
 from starlette import status
 from tortoise.contrib.fastapi import HTTPNotFoundError
 
