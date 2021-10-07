@@ -49,7 +49,7 @@ ALLOWED_HOSTS: List[str] = config(
 
 BROKER_URI: str = config("BROKER_URI", cast=str)
 REDIS_SERVER: str = config("REDIS_SERVER", cast=str)
-LOCK_EXPIRE: int = 60 * 10  # Lock expires in 10 minutes
+LOCK_EXPIRE: int = 60  # Lock expires in 60 sec
 
 # Logging Conf
 

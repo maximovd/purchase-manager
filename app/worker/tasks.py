@@ -1,3 +1,5 @@
+import time
+
 from loguru import logger
 
 from app.models import Products, StatusTypes
@@ -17,16 +19,17 @@ def sync_clean_done_task(self) -> None:
 
 
 async def run_lock_task(self):
-    lock_id = f'{self.name}-lock'
+    lock_id = f"{self.name}-lock"
     async with task_lock(lock_id, self.app.oid) as acquired:
         if acquired:
             return await clean_done_purchase()
-        logger.info(f'{self.name} - already running')
+        logger.info(f"{self.name} - already running")
 
 
 async def clean_done_purchase() -> None:
     """Task for clean purchase with status DONE."""
+    time.sleep(50)
     async for product in Products.all():
         if product.status == StatusTypes.DONE:
             await product.delete()
-            logger.info(f'Purchase <{product.id}> was deleted because it was in the {product.status} state')
+            logger.info(f"Purchase <{product.id}> was deleted because it was in the {product.status} state")

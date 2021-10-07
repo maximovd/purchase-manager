@@ -24,7 +24,7 @@ services:
       - MYSQL_DATABASE=purchase_db
       - MYSQL_ROOT_PASSWORD=password
     volumes:
-    - db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
 
   rabbitmq:
     image: bitnami/rabbitmq:3.7
